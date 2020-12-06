@@ -19,7 +19,7 @@ class Parser:
                 'sql': r,
             })
 
-        print(self.format)
+        # print(self.format)
         # for item in self.format.split(' '):
         #     print(item)
 
@@ -41,26 +41,34 @@ class Parser:
         from_seen = False
         select_seen = False
         where_seen = False
-        groupby_seen = False
-        orderby_seen = False
-        print(parsed)
-        print(stmt.tokens)
+        # print(parsed)
+        # print(stmt.tokens)
+        attributes = []
+        tables = []
+        comparions = []
+        parenthesis = []
+        query = {}
 
         for token in stmt.tokens:
             if select_seen:
                 if isinstance(token, sql.IdentifierList):
                     for identifier in token.get_identifiers():
-                        print("{} {}\n".format("Attr = ", identifier) )
+                        attributes.append(identifier.value)
+                        # print("{} {}\n".format("Attr = ", identifier) )
                 elif isinstance(token, sql.Identifier):
-                    print("{} {}\n".format("Attr = ", token))
+                    attributes.append(token.value)
+                    # print("{} {}\n".format("Attr = ", token))
                 elif token.ttype is T.Wildcard:
-                    print("{} {}\n".format("Attr = ", token))
+                    attributes.append(token.value)
+                    # print("{} {}\n".format("Attr = ", token))
             if from_seen:
                 if isinstance(token, sql.IdentifierList):
                     for identifier in token.get_identifiers():
-                        print("{} {}\n".format("TAB = ", identifier) )
+                        tables.append(identifier)
+                        # print("{} {}\n".format("TAB = ", identifier) )
                 elif isinstance(token, sql.Identifier):
-                    print("{} {}\n".format("TAB = ", token))
+                    tables.append(token.value)
+                    # print("{} {}\n".format("TAB = ", token))
             
             if isinstance(token, sql.Where):
                 select_seen = False
@@ -68,9 +76,11 @@ class Parser:
                 where_seen = True
                 for where_tokens in token:
                     if isinstance(where_tokens, sql.Comparison):
-                        print("{} {}\n".format("Comparaison = ", where_tokens))
+                        comparions.append(where_tokens.value)
+                        # print("{} {}\n".format("Comparaison = ", where_tokens))
                     elif isinstance(where_tokens, sql.Parenthesis):
-                        print("{} {}\n".format("Parenthesis = ", where_tokens))
+                        parenthesis.append(where_tokens.value)
+                        # print("{} {}\n".format("Parenthesis = ", where_tokens))
                     # tables.append(token)
             if token.ttype is T.Keyword and token.value.upper() == "FROM":
                 select_seen = False
@@ -81,6 +91,16 @@ class Parser:
                 from_seen = False
                 where_seen = False
 
+        query["attributes"] = attributes
+        query["tables"] = tables
+        query["comparions"] = comparions
+        query["parenthesis"] = parenthesis
+
+        print(self.query)
+        print (query)
+        print(" ")
+
+        return query
 
 
 if __name__ == '__main__':
@@ -88,4 +108,4 @@ if __name__ == '__main__':
 
     Parser("""select a from b where c < d + e""")
 
-    Parser("""select name, is_group from 'tabWarehouse' where 'tabWarehouse'.company = '_Test Company' order by 'tabWarehouse'.'modified' desc""")
+    Parser("""select name, is_group from tabWarehouse where tabWarehouse.company = '_Test Company' order by tabWarehouse.modified desc""")
