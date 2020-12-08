@@ -14,7 +14,7 @@ from deap import tools
 query = p.Parser("""select * from name_table where a>15 and b<10""")
 predicates = query.parsePredicates()
 new_dict = []
-for comp in predicates['comparions']:
+for comp in predicates['comparisons']:
     if '<' in comp:
         new_dict.append(['lt', comp.split('<')[0], comp.split('<')[1]])
         new_dict.append(['ge', comp.split('<')[0], comp.split('<')[1]])    
@@ -24,8 +24,8 @@ for comp in predicates['comparions']:
 
         
 print(new_dict)
-# print(predicates['comparions'][0])
-# print(len(predicates['comparions'])*2)
+# print(predicates['comparisons'][0])
+# print(len(predicates['comparisons'])*2)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -45,7 +45,7 @@ toolbox.register("attr_bool", random.randint, 0, 30)
 #                         consisting of 100 'attr_bool' elements ('genes')
 # 조건에 따라 구해야하는 총 해의 갯수, 이 예시의 경우에는 x,y,z,w니까 4개
 toolbox.register("individual", tools.initRepeat, creator.Individual,
-    toolbox.attr_bool, len(predicates['comparions'])*2)
+    toolbox.attr_bool, len(predicates['comparisons'])*2)
 
 # define the population to be a list of individuals
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
