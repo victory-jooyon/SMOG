@@ -1,12 +1,13 @@
 import sqlparse
 from sqlparse import sql, tokens as T
-from sqlparse.tokens import Keyword, DML
+from sqlparse.tokens import DML
+
 
 class Parser:
     def __init__(self, raw_query):
         self.query = raw_query
         self.format()
-        self.parsePredicates()
+        self.parse()
 
     def format(self):
         self.format = sqlparse.format(self.query, reindent=True, keyword_case='upper', indent_width="1")
@@ -34,8 +35,7 @@ class Parser:
 
         # print(format_list)
 
-
-    def parsePredicates(self):
+    def parse(self):
         parsed = sqlparse.parse(self.query)
         stmt = parsed[0]
         from_seen = False
@@ -69,7 +69,7 @@ class Parser:
                 elif isinstance(token, sql.Identifier):
                     tables.append(token.value)
                     # print("{} {}\n".format("TAB = ", token))
-            
+
             if isinstance(token, sql.Where):
                 select_seen = False
                 from_seen = False
