@@ -4,10 +4,28 @@
 import random
 import math
 import numpy
+import parse as p
+import operator
 
 from deap import base
 from deap import creator
 from deap import tools
+
+query = p.Parser("""select * from name_table where a>15 and b<10""")
+predicates = query.parsePredicates()
+new_dict = []
+for comp in predicates['comparions']:
+    if '<' in comp:
+        new_dict.append(['lt', comp.split('<')[0], comp.split('<')[1]])
+        new_dict.append(['ge', comp.split('<')[0], comp.split('<')[1]])    
+    if '>' in comp:
+        new_dict.append(['gt', comp.split('>')[0], comp.split('>')[1]])
+        new_dict.append(['le', comp.split('>')[0], comp.split('>')[1]])
+
+        
+print(new_dict)
+# print(predicates['comparions'][0])
+# print(len(predicates['comparions'])*2)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -27,7 +45,7 @@ toolbox.register("attr_bool", random.randint, 0, 30)
 #                         consisting of 100 'attr_bool' elements ('genes')
 # 조건에 따라 구해야하는 총 해의 갯수, 이 예시의 경우에는 x,y,z,w니까 4개
 toolbox.register("individual", tools.initRepeat, creator.Individual,
-    toolbox.attr_bool, 4)
+    toolbox.attr_bool, len(predicates['comparions'])*2)
 
 # define the population to be a list of individuals
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
@@ -39,16 +57,39 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 # evalOneMax는 해당 최적해의 묶음(=염색체 하나)의 fitness를 계산하여 리턴한다
 # p dict는 predicate을 sql에서 파싱해서 만든다
 
+def run_op(op_list):
+    if op_list[0] == 'lt':
+        return operator.lt(int(op_list[1]), int(op_list[2]))
+    elif op_list[0] == 'gt':
+        return operator.gt(int(op_list[1]), int(op_list[2]))
+    elif op_list[0] == 'le':
+        return operator.le(int(op_list[1]), int(op_list[2]))
+    elif op_list[0] == 'ge':
+        return operator.ge(int(op_list[1]), int(op_list[2]))
+    
+def rep(new_dict, x):
+    ans_dict = []
+    for t in new_dict:
+        temp = t.copy()
+        temp[1] = x
+        ans_dict.append(temp)
+    return ans_dict
+        
+print(new_dict)
+
 def evalOneMax(individual):
     print(individual)
     fitness = 0
     for i in range(0, len(individual)):
         x = individual[i]
-        p_dict = {0: [x>15, 15], 1: [x<=15, 16], 2: [x<10, 10], 3: [x>=10, 10]}
-        if p_dict[i][0]:
+        p_dict = rep(new_dict, x)
+        if run_op(p_dict[i]):
             fitness += 1
         else:
-            fitness += 1/(math.sqrt((p_dict[i][1]-x)**2 + (p_dict[i][1]+1-x)**2))
+            if int(p_dict[i][2]) == p_dict[i][1]:
+                fitness += 1/(math.sqrt(2))
+            else:
+                fitness += 1/(math.sqrt((int(p_dict[i][2])-x)**2 + (int(p_dict[i][2])-x)**2))
         print(fitness)
 
     return fitness,
@@ -140,8 +181,6 @@ def main():
         fitnesses = map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-            # 각 individual과 fitness를 프린트
-            print("%s" % (fit))
 
         print("  Evaluated %i individuals" % len(invalid_ind))
 
