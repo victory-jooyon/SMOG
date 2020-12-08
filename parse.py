@@ -45,7 +45,7 @@ class Parser:
         # print(stmt.tokens)
         attributes = []
         tables = []
-        comparions = []
+        comparisons = []
         parenthesis = []
         query = {}
 
@@ -76,7 +76,7 @@ class Parser:
                 where_seen = True
                 for where_tokens in token:
                     if isinstance(where_tokens, sql.Comparison):
-                        comparions.append(where_tokens.value)
+                        comparisons.append(where_tokens.value)
                         # print("{} {}\n".format("Comparaison = ", where_tokens))
                     elif isinstance(where_tokens, sql.Parenthesis):
                         parenthesis.append(where_tokens.value)
@@ -93,7 +93,7 @@ class Parser:
 
         query["attributes"] = attributes
         query["tables"] = tables
-        query["comparions"] = comparions
+        query["comparisons"] = comparisons
         query["parenthesis"] = parenthesis
 
         print(self.query)
