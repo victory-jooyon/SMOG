@@ -1,15 +1,17 @@
 import sqlparse
 from sqlparse import sql, tokens as T
 from sqlparse.tokens import DML
+from moz_sql_parser import parse as moz_parse
+import json
 
 
 class Parser:
     def __init__(self, raw_query):
         self.query = raw_query
-        self.format()
-        self.parse()
+        # self.format()
+        # self.parse()
 
-    def format(self):
+    def old_format(self):
         self.format = sqlparse.format(self.query, reindent=True, keyword_case='upper', indent_width="1")
 
         raw_list = self.format.split('\n')
@@ -20,22 +22,21 @@ class Parser:
                 'sql': r,
             })
 
-        # print(self.format)
-        # for item in self.format.split(' '):
-        #     print(item)
+        print("--------------------------------------------------------------------------------------")
+        print("                                        Query               ")
+        print("--------------------------------------------------------------------------------------")
+        print(self.query)
+        print("--------------------------------------------------------------------------------------")
+        print("                                      Parsed Data              ")
+        print("--------------------------------------------------------------------------------------")
+        print(json.dumps(parse(self.query)))
+        print("--------------------------------------------------------------------------------------")
 
+        print("")
         tokens = sqlparse.parse(self.query)[0].tokens
 
-        # for item in format_list:
-        #     stmt = item['sql']
-        #     i = 0
-        #     while(stmt[i] == ' '):
-        #         item['indent_count'] += 1
-        #         i += 1
 
-        # print(format_list)
-
-    def parse(self):
+    def format(self):
         parsed = sqlparse.parse(self.query)
         stmt = parsed[0]
         from_seen = False
@@ -102,10 +103,62 @@ class Parser:
 
         return query
 
+    def parse(self):
+        data = (moz_parse(query)["where"])
+        conditions = []
+        cond_list = ["lte", "gte", "gt", "le", "eq", "neq"]
+        conditions = self.dataToCondtions(data, [])
+        parsedToData(conditions)
+        
+    def dataToCondtions(data, conditions):
+        for key in data:
+            if key == "and" or key == "or":
+                for i in range(len(data[key])):
+                    first_key = list(data[key][i].keys())[0] 
+                    parse(data[key][i], conditions)
+            else:
+                temp_list = []
+                temp_list.append(key)
+                if key in cond_list:
+                    temp_list.extend(data[key])
+                    conditions.append(temp_list)
+                
+        return conditions
+
+    def parsedToData(conditions):
+        result = []
+        for item in conditions:
+            newList = conditions.copy()
+            newList.remove(item)
+            tempList = []
+            tempList.append(item)
+            tempList.extend(newList)
+            result.append(tempList)
+            print(item)
+            newItem = item.copy()
+            if newItem[0] == "lte":
+                newItem[0] = "gt"
+            elif newItem[0] == "gt":
+                newItem[0] = "lte"
+            elif newItem[0] == "gte":
+                newItem[0] = "lt"
+            elif newItem[0] == "lt":
+                newItem[0] = "gte"
+            elif newItem[0] == "eq":
+                newItem[0] = "neq"
+            elif newItem[0] == "neq":
+                newItem[0] = "eq"
+                
+            tempList = []
+            tempList.append(newItem)
+            tempList.extend(newList)
+            result.append(tempList)
+        
+        return result
 
 if __name__ == '__main__':
-    Parser("""select * from foo where a > 10 and b < 15""")
+    Parser("""select * from foo where a > 10 """)
 
-    Parser("""select a from b where c < d + e""")
+    Parser("""select a from b where c < 17""")
 
-    Parser("""select name, is_group from tabWarehouse where tabWarehouse.company = '_Test Company' order by tabWarehouse.modified desc""")
+    # Parser("""select name, is_group from tabWarehouse where tabWarehouse.company = '_Test Company' order by tabWarehouse.modified desc""")
