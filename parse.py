@@ -115,7 +115,7 @@ class Parser:
             if key == "and" or key == "or":
                 for i in range(len(data[key])):
                     first_key = list(data[key][i].keys())[0] 
-                    self.dataToCondtions(data[key][i], conditions)
+                    self.dataToCondtions(data[key][i], conditions, cond_list)
             else:
                 temp_list = []
                 temp_list.append(key)
