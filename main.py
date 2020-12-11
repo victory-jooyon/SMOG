@@ -9,7 +9,7 @@ from parse import Parser
 
 def main(args):
     raw_sql_queries = [
-        """select * from user where age > 10 and class = 5""",
+        """select * from user where age > 10 and class <= 5""",
     ]
 
     raw_sql_query = random.choice(raw_sql_queries)
@@ -20,6 +20,7 @@ def main(args):
         print("Predicate : ", p)
         ga_results.append(GA(args, raw_sql_query, p).evolve())
 
+    print('GA results:', ga_results)
     sql = MySQL().create(args.sql_file).read_schema()
     Evaluator(sql).insert_data(ga_results).read_test_queries(args.test_sql_file)
 

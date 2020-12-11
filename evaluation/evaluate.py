@@ -37,10 +37,10 @@ class Evaluator:
             inserting_query = inserting_query[:-2]
             inserting_query += ')'
 
-            print('Inserting data:', inserting_query)
             inserting_queries.append(inserting_query)
             inserting_values.append(tuple(inserting_data.values()))
 
+        print('======= Inserting data:', inserting_query)
         print(inserting_values)
         self.cursor.executemany(inserting_query, inserting_values)
 
