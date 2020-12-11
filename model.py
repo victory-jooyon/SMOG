@@ -11,7 +11,6 @@ class GA:
     def __init__(self, args, query, predicate):
         self.query = query
         self.comparisons = predicate # [['gt', 'a', 10], ['lt', 'b', 15]]
-#         print(predicate)
         field = []
         result_form = {}
         for i in range(0, len(predicate)):
@@ -19,9 +18,7 @@ class GA:
                 result_form[predicate[i][1]] = -1
             elif not isinstance(predicate[i][2], int):
                 result_form[predicate[i][2]] = -1
-#         print(result_form)
         self.result = result_form
-#         print(self.result)
         random.seed()
 
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -43,22 +40,8 @@ class GA:
         self.MUTPB = args.mutation_pb
         self.generations = args.generations
 
-
-#     def parse(self):
-#         self.parsed_query = Parser(self.query).parse()
-#         self.parsed_query = moz_parse(self.query)['where']
-        
-#         comparisons = []
-#         for comp in self.parsed_query['comparisons']:
-#             if '<' in comp:
-#                 comparisons.append(['lt', comp.split('<')[0], comp.split('<')[1]])
-#                 comparisons.append(['ge', comp.split('<')[0], comp.split('<')[1]])
-#             if '>' in comp:
-#                 comparisons.append(['gt', comp.split('>')[0], comp.split('>')[1]])
-#                 comparisons.append(['le', comp.split('>')[0], comp.split('>')[1]])
-
-#         self.comparisons = comparisons
-#         self.comparisons = self.parsed_query
+    def parse(self):
+        self.parsed_query = Parser(self.query).parse()
 
     def register_toolbox(self):
         # Attribute generator
@@ -100,7 +83,7 @@ class GA:
         self.toolbox.register("select", tools.selSPEA2)
 
     def evolve(self):
-#         print("Start of evolution")
+        # print("Start of evolution")
 
         # Evaluate the entire population
         fitnesses = list(map(self.toolbox.evaluate, self.population))
@@ -108,7 +91,7 @@ class GA:
             # ind = individual
             ind.fitness.values = fit
 
-#         print("  Evaluated %i individuals" % len(self.population))
+        # print("  Evaluated %i individuals" % len(self.population))
 
         # Extracting all the fitnesses of
         fits = [ind.fitness.values[0] for ind in self.population]
@@ -121,7 +104,7 @@ class GA:
         while max(fits) < len(self.comparisons) and g < 1000:
             # A new generation
             g = g + 1
-#             print("-- Generation %i --" % g)
+            # print("-- Generation %i --" % g)
 
             # Select the next generation individuals
             offspring = self.toolbox.select(self.population, len(self.population))
@@ -153,7 +136,7 @@ class GA:
             for ind, fit in zip(invalid_ind, fitnesses):
                 ind.fitness.values = fit
 
-#             print("  Evaluated %i individuals" % len(invalid_ind))
+            # print("  Evaluated %i individuals" % len(invalid_ind))
 
             # The population is entirely replaced by the offspring
             self.population[:] = offspring
@@ -166,12 +149,12 @@ class GA:
             sum2 = sum(x * x for x in fits)
             std = abs(sum2 / length - mean ** 2) ** 0.5
 
-#             print("  Min %s" % min(fits))
-#             print("  Max %s" % max(fits))
-#             print("  Avg %s" % mean)
-#             print("  Std %s" % std)
+            # print("  Min %s" % min(fits))
+            # print("  Max %s" % max(fits))
+            # print("  Avg %s" % mean)
+            # print("  Std %s" % std)
 
-#         print("-- End of (successful) evolution --")
+        # print("-- End of (successful) evolution --")
 
         best_ind = tools.selBest(self.population, 1)[0]
 
@@ -183,8 +166,8 @@ class GA:
         print("======= RETURN DICT :",self.result," =======\n")
         return self.result
     
-#         print("RESULT : (%s, %s) (%s, %s) (%s, %s) (%s, %s)" % (
-#             best_ind[0], best_ind[2], best_ind[0], best_ind[3], best_ind[1], best_ind[2], best_ind[1], best_ind[3]))
+        # print("RESULT : (%s, %s) (%s, %s) (%s, %s) (%s, %s)" % (
+        #     best_ind[0], best_ind[2], best_ind[0], best_ind[3], best_ind[1], best_ind[2], best_ind[1], best_ind[3]))
 
     def evaluate_fittest(self, population):
         # 해당 최적해의 묶음(=염색체 하나)의 fitness를 계산하여 리턴한다
@@ -212,12 +195,12 @@ class GA:
                 num_comparisons.append(temp)
             return num_comparisons
 
-#         print(population)
+        # print(population)
         fitness = 0
         for i in range(0, len(population)):
             x = population[i]
             p_list = substitute(self.comparisons, x)
-#             print('=====fittest:', self.comparisons, x, p_list)
+            # print('=====fittest:', self.comparisons, x, p_list)
             if run_op(p_list[i]):
                 fitness += 1
             else:
@@ -226,6 +209,6 @@ class GA:
                     fitness += 1 / (math.sqrt(2))
                 else:
                     fitness += 1 / (math.sqrt((int(p_list[i][2]) - x) ** 2 + (int(p_list[i][2]) - x) ** 2))
-#             print(fitness)
+            # print(fitness)
 
         return fitness,
