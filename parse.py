@@ -9,7 +9,8 @@ class Parser:
     def __init__(self, raw_query):
         self.query = raw_query
         # self.format()
-        # self.parse()
+        result = self.parse()
+        print(result)
 
     def old_format(self):
         self.format = sqlparse.format(self.query, reindent=True, keyword_case='upper', indent_width="1")
@@ -105,11 +106,11 @@ class Parser:
 
     def parse(self):
         data = (moz_parse(self.query)["where"])
-        self.cond_list = ["lte", "gte", "gt", "lt", "eq", "neq"]
-        conditions = self.dataToCondtions(data, [])
-        self.parsedToData(conditions)
+        cond_list = ["lte", "gte", "gt", "lt", "eq", "neq"]
+        conditions = self.dataToCondtions(data, [], cond_list)
+        return self.parsedToData(conditions)
 
-    def dataToCondtions(self, data, conditions):
+    def dataToCondtions(self, data, conditions, cond_list):
         for key in data:
             if key == "and" or key == "or":
                 for i in range(len(data[key])):
@@ -118,7 +119,7 @@ class Parser:
             else:
                 temp_list = []
                 temp_list.append(key)
-                if key in self.cond_list:
+                if key in cond_list:
                     temp_list.extend(data[key])
                     conditions.append(temp_list)
                 
