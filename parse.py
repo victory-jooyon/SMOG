@@ -10,7 +10,6 @@ class Parser:
         self.query = raw_query
         # self.format()
         result = self.parse()
-        print(result)
 
     def old_format(self):
         self.format = sqlparse.format(self.query, reindent=True, keyword_case='upper', indent_width="1")
