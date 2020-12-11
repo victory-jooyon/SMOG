@@ -104,13 +104,12 @@ class Parser:
         return query
 
     def parse(self):
-        data = (moz_parse(query)["where"])
-        conditions = []
-        cond_list = ["lte", "gte", "gt", "le", "eq", "neq"]
+        data = (moz_parse(self.query)["where"])
+        self.cond_list = ["lte", "gte", "gt", "lt", "eq", "neq"]
         conditions = self.dataToCondtions(data, [])
-        parsedToData(conditions)
-        
-    def dataToCondtions(data, conditions):
+        self.parsedToData(conditions)
+
+    def dataToCondtions(self, data, conditions):
         for key in data:
             if key == "and" or key == "or":
                 for i in range(len(data[key])):
@@ -119,13 +118,13 @@ class Parser:
             else:
                 temp_list = []
                 temp_list.append(key)
-                if key in cond_list:
+                if key in self.cond_list:
                     temp_list.extend(data[key])
                     conditions.append(temp_list)
                 
         return conditions
 
-    def parsedToData(conditions):
+    def parsedToData(self, conditions):
         result = []
         for item in conditions:
             newList = conditions.copy()
@@ -134,7 +133,6 @@ class Parser:
             tempList.append(item)
             tempList.extend(newList)
             result.append(tempList)
-            print(item)
             newItem = item.copy()
             if newItem[0] == "lte":
                 newItem[0] = "gt"
@@ -153,7 +151,7 @@ class Parser:
             tempList.append(newItem)
             tempList.extend(newList)
             result.append(tempList)
-        
+
         return result
 
 if __name__ == '__main__':
