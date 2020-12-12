@@ -9,7 +9,7 @@ from parse import Parser
 
 def main(args):
     raw_sql_queries = [
-        """select * from user where age > 10 and class <= 5""",
+        """select * from user where age > 10 and class <= 5 and id > 1""",
     ]
 
     raw_sql_query = random.choice(raw_sql_queries)
