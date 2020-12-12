@@ -7,12 +7,9 @@ from evaluation.evaluate import Evaluator
 from model import GA
 from parse import Parser
 
-def main(args):
-    raw_sql_queries = [
-        """select * from user where age > 10 and class <= 5 and id > 1""",
-    ]
 
-    raw_sql_query = random.choice(raw_sql_queries)
+def main(args):
+    raw_sql_query = """select * from user where age > 10 and class <= 5 and id > 1"""
     predicates = Parser(raw_sql_query).parse()
 
     ga_results = []
